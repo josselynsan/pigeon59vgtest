@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="assets/css/brand.css" rel="stylesheet">
+  <link href="assets/css/brand.css?v=20260801" rel="stylesheet">
   <style>
     .os-grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 24px; align-items: stretch; width: 100%; max-width: var(--maxw); }
     @media (max-width: 900px) { .os-grid { grid-template-columns: 1fr; } }
@@ -135,6 +135,28 @@
       .os-dates-mini { margin: 10px 0; }
     }
   </style>
+  <script>
+    // Theme the Basis Theory card iframes so their text/placeholders match the
+    // native .pf-input fields (02-billing.html reference). Read by
+    // /checkout/js/basistheory-front-integration.js before mounting.
+    window.SWIFTLY_BT_APPEARANCE = {
+      style: {
+        base: {
+          fontSize: '16px',
+          fontFamily: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+          color: '#1c2733',
+          padding: '0',
+          lineHeight: '1.5',
+          '::placeholder': { color: '#9aa4b0' }
+        }
+      },
+      placeholders: {
+        cardNumber: '0000 0000 0000 0000',
+        expiration: 'MM / YY',
+        cvc: '***'
+      }
+    };
+  </script>
 </head>
 <body class="step-page" data-swiftly-step="billing-information">
 
@@ -335,11 +357,11 @@
   </footer>
 
   <script src="assets/libs/lucide/lucide.min.js"></script>
-  <script src="assets/js/flow-state.js"></script>
-  <script src="assets/js/legal-modal.js"></script>
-  <script src="assets/js/sticky-offer.js"></script>
-  <script src="assets/js/keyboard-aware.js"></script>
-  <script src="assets/js/billing-regions.js"></script>
+  <script src="assets/js/flow-state.js?v=20260801"></script>
+  <script src="assets/js/legal-modal.js?v=20260801"></script>
+  <script src="assets/js/sticky-offer.js?v=20260801"></script>
+  <script src="assets/js/keyboard-aware.js?v=20260801"></script>
+  <script src="assets/js/billing-regions.js?v=20260801"></script>
   <script>
   (function () {
     var s = FlowState.get();
@@ -512,6 +534,6 @@
   })();
   </script>
   <script>lucide.createIcons();</script>
-  <script src="/js/swiftly-offer-flow.js?v=20260730vg" defer></script>
+  <script src="/js/swiftly-offer-flow.js?v=20260801" defer></script>
 </body>
 </html>
