@@ -78,6 +78,37 @@
     .pf-select:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(33,82,114,.12); }
     .pf-select.is-invalid { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(233, 101, 74, .14); }
     .pf-select:disabled { background-color: var(--bg); color: var(--muted); cursor: not-allowed; }
+
+    /* ---- Basis Theory injected card fields ----
+       swiftly-front-tokenization.js hides the native Credit Card Number /
+       Exp. Date / CVC inputs and mounts generic Bootstrap-style containers.
+       Restyle those mounts so they look exactly like .pf-field / .pf-input /
+       .pf-row from the brand stylesheet (02-billing.html reference). */
+    .swiftly-tokenize-mount { display: flex; flex-direction: column; margin: 0; }
+    .swiftly-tokenize-mount label { font-size: 13px; font-weight: 600; color: var(--text); margin: 0 0 6px; }
+    .swiftly-tokenize-mount .form-control {
+      width: 100%;
+      background: var(--white);
+      border: 1px solid var(--field-border);
+      border-radius: var(--radius-sm);
+      /* !important beats the inline padding/min-height set by the injector */
+      padding: 0 14px !important;
+      min-height: 46px !important;
+      display: flex; flex-direction: column; justify-content: center;
+      box-shadow: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .swiftly-tokenize-mount .form-control:focus-within { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(33, 82, 114, .12); }
+    .swiftly-tokenize-mount .form-control iframe { display: block; width: 100%; }
+    /* Exp. Date + CVC side by side, like .pf-row */
+    .swiftly-tokenize-mount .row { display: flex; gap: 12px; margin: 12px 0 0 !important; }
+    .swiftly-tokenize-mount .row > [class*="col"] { flex: 1 1 0; min-width: 0; padding: 0; }
+    .swiftly-tokenize-mount .row .form-group { display: flex; flex-direction: column; margin: 0; }
+    @media (max-width: 520px) { .swiftly-tokenize-mount .row { flex-direction: column; } }
+    /* Collapse the emptied .pf-row that held the native Exp/CVC inputs so it
+       doesn't leave a stray flex gap in .bill-fields. */
+    .bill-fields .pf-row:has(> .pf-field[style*="display: none"]) { display: none; }
+
     .bill-safe { text-align: center; margin-top: 18px; }
     .bill-safe__title { font-weight: 800; color: var(--ink); margin-bottom: 10px; }
     .bill-safe__icons { display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; }
