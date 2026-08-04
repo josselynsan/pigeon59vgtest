@@ -106,6 +106,14 @@
     }
     .swiftly-tokenize-mount .form-control:focus-within { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(33, 82, 114, .12); }
     .swiftly-tokenize-mount .form-control iframe { display: block; width: 100%; }
+    .swiftly-tokenize-mount .pf-field.is-invalid > .form-control,
+    .swiftly-tokenize-mount .form-control.is-invalid {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(233, 101, 74, .14);
+    }
+    .swiftly-tokenize-mount .pf-field__error { display: none; margin-top: 5px; color: var(--coral); font-size: 12px; font-weight: 700; }
+    .swiftly-tokenize-mount .pf-field.is-invalid .pf-field__error,
+    .swiftly-tokenize-mount .pf-field__error.is-shown { display: block; }
     /* Exp. Date + CVC side by side, like .pf-row */
     .swiftly-tokenize-mount .row { display: flex; gap: 12px; margin: 12px 0 0 !important; }
     .swiftly-tokenize-mount .row > [class*="col"] { flex: 1 1 0; min-width: 0; padding: 0; }
@@ -222,7 +230,7 @@
 
     <div class="os-grid">
       <!-- LEFT: BILLING -->
-      <form class="pf-card" id="billingForm" method="post" action="javascript:void(0);" data-step-slug="billing-information" onsubmit="return false;" novalidate>
+      <form class="pf-card" id="billingForm" method="post" action="javascript:void(0);" data-step-slug="billing-information" data-offer-flow-ignore onsubmit="return false;" novalidate>
         <div class="pf-card__pad">
           <h2 class="pf-title">Complete Your Billing Info</h2>
 
@@ -506,6 +514,11 @@
 
     f.addEventListener("submit", function (e) {
       e.preventDefault();
+      // Own this submit so Offer Flow bootstrap cannot bypass client validation.
+      e.stopImmediatePropagation();
+      // Sync lock: blocks double-click before async submitForm disables the Pay button
+      // (tokenization runs first and used to leave the button clickable).
+      if (f.__billingSubmitting) return;
       var name = (f.elements.cardholder_name.value || "").trim();
       var num = (f.elements.card_number.value || "").replace(/\s/g, "");
       var exp = (f.elements.card_exp.value || "").replace(/\D/g, "");
@@ -523,9 +536,32 @@
       invalidate("billing_city", !city); bad = bad || !city;
       invalidate("billing_state", !st); bad = bad || !st;
       invalidate("billing_zip", zip.length < 5); bad = bad || zip.length < 5;
-      invalidate("card_number", num.length < 15); bad = bad || num.length < 15;
-      invalidate("card_exp", exp.length < 4); bad = bad || exp.length < 4;
-      invalidate("card_cvc", cvc.length < 3); bad = bad || cvc.length < 3;
+      // Native card inputs may be hidden when Basis Theory mounts; only require
+      // them when they are still visible/usable for this checkout.
+      var cardNumEl = f.elements.card_number;
+      var cardExpEl = f.elements.card_exp;
+      var cardCvcEl = f.elements.card_cvc;
+      var nativeCardVisible = !!(cardNumEl && cardNumEl.offsetParent !== null);
+      if (nativeCardVisible) {
+        invalidate("card_number", num.length < 15); bad = bad || num.length < 15;
+        invalidate("card_exp", exp.length < 4); bad = bad || exp.length < 4;
+        invalidate("card_cvc", cvc.length < 3); bad = bad || cvc.length < 3;
+      } else if (
+        window.SwiftlyFrontTokenization &&
+        typeof window.SwiftlyFrontTokenization.validateTokenizationFields === "function"
+      ) {
+        // Active front tokenizer (BT / Stripe / Shift4 / custom): validate frames before submit.
+        if (!window.SwiftlyFrontTokenization.validateTokenizationFields()) {
+          bad = true;
+        }
+      } else if (
+        window.SwiftlyFrontTokenization &&
+        typeof window.SwiftlyFrontTokenization.validateBasisTheoryFields === "function"
+      ) {
+        if (!window.SwiftlyFrontTokenization.validateBasisTheoryFields()) {
+          bad = true;
+        }
+      }
       if (terms && !terms.checked) {
         bad = true;
         var termsLbl = terms.closest(".pf-check");
@@ -539,11 +575,25 @@
         var termsErrOk = document.getElementById("termsError");
         if (termsErrOk) { termsErrOk.classList.remove("is-shown"); termsErrOk.style.display = ""; }
       }
-      if (bad) { var first = f.querySelector(".pf-field.is-invalid .pf-input, .pf-field.is-invalid .pf-select"); if (first) first.focus(); return; }
+      if (bad) {
+        var first = f.querySelector(".pf-field.is-invalid .pf-input, .pf-field.is-invalid .pf-select");
+        if (first) first.focus();
+        return;
+      }
 
       if (swiftlyHasOfferFlowSession()) {
         if (window.SwiftlyOfferFlow && typeof window.SwiftlyOfferFlow.submitForm === "function") {
-          window.SwiftlyOfferFlow.submitForm(f);
+          f.__billingSubmitting = true;
+          var payBtn = document.getElementById("payBtn");
+          if (payBtn) {
+            if (!payBtn.dataset.originalText) payBtn.dataset.originalText = payBtn.textContent || "";
+            payBtn.disabled = true;
+            payBtn.textContent = "Processing\u2026";
+          }
+          Promise.resolve(window.SwiftlyOfferFlow.submitForm(f)).finally(function () {
+            f.__billingSubmitting = false;
+            // submitForm restores Pay button text/disabled in its own finally
+          });
         }
         return;
       }
@@ -554,6 +604,6 @@
   })();
   </script>
   <script>lucide.createIcons();</script>
-  <script src="/js/swiftly-offer-flow.js?v=20260803inline" defer></script>
+  <script src="/js/swiftly-offer-flow.js?v=20260804histtrap" defer></script>
 </body>
 </html>
