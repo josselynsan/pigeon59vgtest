@@ -26,6 +26,7 @@
       var p = u.pathname.replace(/\/+$/, "");
       return /\/(terms-and-conditions|privacy-policy)\.html$/i.test(p)
         || /\/checkout\/(tc|pp)$/i.test(p)
+        || /\/flow\/steps\/checkout\/(tc|pp)$/i.test(p)
         || /^\/(tc|pp)$/i.test(p);
     } catch (e) {
       return false;
@@ -202,11 +203,21 @@
       return href;
     }
   }
-  document.querySelectorAll('a[href*="terms-and-conditions"], a[href*="privacy-policy"], a[href*="/checkout/tc"], a[href*="/checkout/pp"], a[href="/checkout/tc"], a[href="/checkout/pp"]').forEach(function (a) {
-    var href = a.getAttribute("href") || "";
-    if (!isLegalHref(href)) return;
-    a.setAttribute("href", withOfferQuery(href));
-  });
+  // Offer Core / base href often serves relative checkout/tc (no leading "/").
+  // Match both forms — same as working poconos prod.
+  var LEGAL_LINK_SEL = 'a[href*="terms-and-conditions"], a[href*="privacy-policy"], a[href*="/checkout/tc"], a[href*="/checkout/pp"], a[href="/checkout/tc"], a[href="/checkout/pp"], a[href="checkout/tc"], a[href="checkout/pp"]';
+
+  function rewriteLegalHrefs() {
+    document.querySelectorAll(LEGAL_LINK_SEL).forEach(function (a) {
+      var href = a.getAttribute("href") || "";
+      if (!isLegalHref(href)) return;
+      a.setAttribute("href", withOfferQuery(href));
+    });
+  }
+  rewriteLegalHrefs();
+  // Re-apply if Offer Flow reinjects footer HTML after this script.
+  setTimeout(rewriteLegalHrefs, 0);
+  setTimeout(rewriteLegalHrefs, 500);
 
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[href]");
@@ -219,5 +230,5 @@
     e.preventDefault();
     e.stopPropagation();
     location.hash = legalKindFromHref(a.getAttribute("href") || "") === "privacy" ? "privacy" : "terms";
-  });
+  }, true);
 })();
