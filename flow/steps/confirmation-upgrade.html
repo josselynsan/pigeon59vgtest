@@ -7,15 +7,19 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="assets/css/brand.css?v=20260801" rel="stylesheet">
+  <link href="assets/css/brand.css?v=20260805footgap" rel="stylesheet">
+  <!-- Favicon -->
+  <link href="assets/images/vacationgurus-favicon.svg" rel="shortcut icon" type="image/svg+xml">
+  <link href="assets/images/vacationgurus-favicon.png" rel="apple-touch-icon">
   <style>
     /* ===== Interstitial — "Vacation secured / complete your trip" =====
        Reskinned from Figma into our design system (navy + coral, ty-* blocks). */
     .sec-wrap { width: 100%; max-width: 900px; margin: 0 auto; }
 
     .sec-intro { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
-    .sec-h1 { font-size: 30px; font-weight: 400; color: var(--navy); line-height: 1.25; letter-spacing: -.01em; margin: 0; max-width: 720px; }
-    .sec-h1 strong { font-weight: 800; }
+    .sec-h1 { font-size: 30px; font-weight: 400; color: var(--navy); line-height: 1.25; letter-spacing: -.01em; margin: 0; max-width: 720px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .sec-h1 strong, .sec-h1__name { font-weight: 800; display: block; }
+    .sec-h1__msg { display: block; font-weight: 400; }
     .sec-sub { font-size: 16px; font-weight: 500; color: var(--navy); line-height: 1.5; margin: 0; max-width: 580px; }
     .sec-cta { margin-top: 6px; }
     .sec-cta .pf-btn { width: auto; padding: 16px 48px; font-size: 18px; }
@@ -50,6 +54,7 @@
     .ty-line .pf-i { width: 20px; height: 20px; flex: 0 0 auto; color: var(--navy); }
     .ty-line .k { font-weight: 700; }
     .ty-line .v { font-weight: 500; }
+    .ty-line .v a { color: var(--navy); font-weight: 700; text-decoration: underline; }
     .ty-extra { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--navy); }
     .ty-extra .pf-i { width: 20px; height: 20px; flex: 0 0 auto; color: var(--navy); }
     .ty-extra .k { font-weight: 500; flex: 1 1 auto; }
@@ -126,9 +131,8 @@
               <div class="ty-line"><i data-lucide="clipboard-check" class="pf-i"></i><span class="k">Receipt #</span><span class="v" id="receiptNo">&mdash;</span></div>
               <div class="ty-line"><i data-lucide="bed-double" class="pf-i"></i><span class="k">Unit type:</span><span class="v" id="unitType">Spacious Room</span></div>
               <div class="ty-line"><i data-lucide="moon" class="pf-i"></i><span class="k">Number of nights:</span><span class="v">3 Nights</span></div>
-              <div class="ty-line"><i data-lucide="users" class="pf-i"></i><span class="k">Guests:</span><span class="v" id="sumGuests">2 Adults, 2 Children</span></div>
-              <div class="ty-line"><i data-lucide="calendar" class="pf-i"></i><span class="k">Preferred check-in:</span><span class="v" id="checkIn">&mdash;</span></div>
-              <div class="ty-line"><i data-lucide="calendar" class="pf-i"></i><span class="k">Preferred check-out:</span><span class="v" id="checkOut">&mdash;</span></div>
+              <div class="ty-line"><i data-lucide="calendar" class="pf-i"></i><span class="k">Check-in:</span><span class="v" id="checkIn">Call now to book your dates. <a href="tel:8653023407">865-302-3407</a></span></div>
+              <div class="ty-line"><i data-lucide="calendar" class="pf-i"></i><span class="k">Check-out:</span><span class="v" id="checkOut">Call now to book your dates. <a href="tel:8653023407">865-302-3407</a></span></div>
               <div class="ty-line"><i data-lucide="credit-card" class="pf-i"></i><span class="k">Package Price:</span><span class="v" id="pkgPrice">$59</span></div>
             </div>
           </div>
@@ -141,16 +145,16 @@
       </div>
 
       <!-- Temporary card-hold disclaimer -->
-      <div class="sec-hold" role="note">
+      <!-- <div class="sec-hold" role="note">
         <i data-lucide="credit-card" class="pf-i" aria-hidden="true"></i>
         <p>A temporary hold may appear on your card. This is not an additional charge &mdash; it verifies your card and will automatically adjust to your actual purchase total within 3&ndash;5 business days. Any unused portion is released back to your available balance automatically.</p>
-      </div>
+      </div> -->
 
       <!-- Contacts -->
-      <div class="sec-contacts">
+      <!-- <div class="sec-contacts">
         <a class="sec-call" href="tel:18008848787"><i data-lucide="phone" class="pf-i" aria-hidden="true"></i> Questions? Call: 1-800-884-8787</a>
         <div class="sec-hours"><strong>Call Center Hours:</strong><br>Monday&ndash;Friday, 10 AM &ndash; 4 PM ET</div>
-      </div>
+      </div> -->
 
     </div>
   </main>
@@ -196,8 +200,6 @@
 
     var receipt = document.getElementById("receiptNo");
     if (receipt) receipt.textContent = confNo || "\u2014";
-    var sumGuests = document.getElementById("sumGuests");
-    if (sumGuests) sumGuests.textContent = prefill.guestsLabel || s.guestsLabel;
     var totalPaid = document.getElementById("totalPaid");
     if (totalPaid) {
       if (prefill.total_amount || prefill.totalAmount) {
@@ -210,13 +212,34 @@
     var pkgPrice = document.getElementById("pkgPrice");
     if (pkgPrice) pkgPrice.textContent = FlowState.money(s.priceCents);
 
+    // Personalized thank-you headline — name on its own line, message below.
+    var guest = s.guest || {};
+    var firstName = (prefill.first_name || prefill.firstName || prefill.fname || guest.firstName || "").trim();
+    var lastName = (prefill.last_name || prefill.lastName || prefill.lname || guest.lastName || "").trim();
+    var fullName = [firstName, lastName].filter(Boolean).join(" ");
+    var headline = document.getElementById("secHeadline");
+    if (headline) {
+      if (fullName) {
+        var safe = fullName.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        headline.innerHTML = "<strong class=\"sec-h1__name\">" + safe + ",</strong><span class=\"sec-h1__msg\">your Smoky Mountains vacation is secured.</span>";
+      } else {
+        headline.textContent = "Your Smoky Mountains vacation is secured.";
+      }
+    }
+
     document.querySelectorAll("[data-year]").forEach(function (el) { el.textContent = new Date().getFullYear(); });
 
     // Dates + extras summary
     try {
       // Parse "YYYY-MM-DD" as a LOCAL date so UTC-x timezones don't shift a day back.
-      var fmt = function (t) {
-        if (!t) return "\u2014";
+      // When no dates were selected, show the booking call-to-action with a tap-to-call link.
+      var DATE_FALLBACK_HTML = "Call now to book your dates. <a href=\"tel:8653023407\">865-302-3407</a>";
+      var setDateVal = function (el, t) {
+        if (!el) return;
+        if (!t) {
+          el.innerHTML = DATE_FALLBACK_HTML;
+          return;
+        }
         var d;
         if (typeof t === "string" && /^\d{4}-\d{2}-\d{2}$/.test(t)) {
           var p = t.split("-");
@@ -224,12 +247,14 @@
         } else {
           d = new Date(t);
         }
-        return isNaN(d.getTime()) ? "\u2014" : d.toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" });
+        if (isNaN(d.getTime())) {
+          el.innerHTML = DATE_FALLBACK_HTML;
+          return;
+        }
+        el.textContent = d.toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" });
       };
-      var cin = document.getElementById("checkIn");
-      var cout = document.getElementById("checkOut");
-      if (cin) cin.textContent = fmt(prefill.travel_start_date || s.dates.checkIn);
-      if (cout) cout.textContent = fmt(prefill.travel_end_date || s.dates.checkOut);
+      setDateVal(document.getElementById("checkIn"), prefill.travel_start_date || s.dates.checkIn);
+      setDateVal(document.getElementById("checkOut"), prefill.travel_end_date || s.dates.checkOut);
       var extras = document.getElementById("extrasList");
       if (extras) {
         // Same extras row markup/icons as payment-flow 04-secured.html

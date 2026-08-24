@@ -7,7 +7,10 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="assets/css/brand.css?v=20260801" rel="stylesheet">
+  <link href="assets/css/brand.css?v=20260805footgap" rel="stylesheet">
+  <!-- Favicon -->
+  <link href="assets/images/vacationgurus-favicon.svg" rel="shortcut icon" type="image/svg+xml">
+  <link href="assets/images/vacationgurus-favicon.png" rel="apple-touch-icon">
   <style>
     /* ---- Step 1 layout ---- */
     .os-grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 24px; align-items: stretch; width: 100%; max-width: var(--maxw); }
@@ -310,7 +313,6 @@
     var sumPriceEl = document.getElementById("sumPrice"); if (sumPriceEl) sumPriceEl.textContent = FlowState.money(s.priceCents);
     document.getElementById("sumTotal").textContent = FlowState.money(FlowState.totalCents());
     document.getElementById("sumReviews").textContent = (s.ratingReviews || 0).toLocaleString("en-US");
-    var sumGuests = document.getElementById("sumGuests"); if (sumGuests) sumGuests.textContent = s.guestsLabel;
     var sumSave = document.getElementById("sumSave"); if (sumSave && s.discountPct != null) sumSave.textContent = "Save " + s.discountPct + "%";
     document.querySelectorAll("[data-year]").forEach(function (el) { el.textContent = new Date().getFullYear(); });
 
@@ -469,6 +471,11 @@
     }
 
     function proceed(g, marketingConsented) {
+      // Persist guest locally so the Thank You page can personalize the headline
+      // even when Offer Flow owns navigation / session state.
+      FlowState.setIn("guest", g);
+      FlowState.setIn("consent", { marketing: !!marketingConsented, sms: !!f.elements.sms_consent.checked });
+
       if (ofSession) {
         if (window.SwiftlyOfferFlow && typeof window.SwiftlyOfferFlow.submitForm === "function") {
           window.SwiftlyOfferFlow.submitForm(f);
@@ -477,8 +484,6 @@
       }
 
       // Static preview fallback (no Offer Flow session)
-      FlowState.setIn("guest", g);
-      FlowState.setIn("consent", { marketing: !!marketingConsented, sms: !!f.elements.sms_consent.checked });
       FlowState.set({ status: "billing" });
       console.log("[static-front] general-information submit mocked");
       window.location.href = "billing-information.html" + window.location.search;

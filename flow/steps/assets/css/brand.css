@@ -51,13 +51,23 @@
 
 * { box-sizing: border-box; }
 
+html {
+  /* Match footer so overscroll / short-page gaps under the footer stay dark. */
+  background: #051028;
+}
 html, body {
   margin: 0;
   padding: 0;
   font-family: var(--font);
   color: var(--text);
-  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+}
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 img { max-width: 100%; display: block; }
@@ -125,6 +135,8 @@ a { color: inherit; }
 
 /* ============ PAGE SHELL ============ */
 .pf-main {
+  flex: 1 0 auto;
+  width: 100%;
   padding: 40px 20px 56px;
   display: flex;
   flex-direction: column;
@@ -332,14 +344,13 @@ a { color: inherit; }
 .pf-hold__timer { font-size: 40px; font-weight: 900; color: var(--coral); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .pf-hold__note { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-/* ============ SITE FOOTER (matches homepage .footer-2) ============ */
+/* ============ SITE FOOTER (matches homepage .footer) ============ */
 .pf-footer {
+  flex-shrink: 0;
+  margin-top: auto;
   color: #fff;
   text-align: center;
-  background-color: var(--navy);
-  background-image: url('../images/pattern.png');
-  background-repeat: repeat;
-  background-blend-mode: overlay;
+  background-color: #051028;
   padding: 30px 32px;
   display: flex;
   flex-direction: column;
@@ -487,9 +498,9 @@ a { color: inherit; }
    spans the full column width so both stacked rows match. */
 @media (max-width: 900px) {
   .os-summary, .up-summary { max-width: none; width: 100%; margin: 0; }
-  /* Clear the fixed bottom action bar so no content hides behind it. */
-  .pf-main { padding-bottom: 32px; }
-  .pf-footer { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  /* Clear the fixed bottom bars with dark footer padding (not light body padding). */
+  .pf-main { padding-bottom: calc(32px + var(--pf-barspace, 0px)); }
+  .pf-footer { padding-bottom: calc(var(--pf-barspace, 80px) + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ============ MOBILE VERTICAL COMPRESSION ============

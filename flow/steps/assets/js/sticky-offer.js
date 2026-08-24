@@ -32,9 +32,6 @@
       ".pf-offerbar__amount { font-size: 24px; font-weight: 900; color: var(--ink); line-height: 1; }",
       ".pf-offerbar__per { font-size: 10px; font-weight: 600; color: var(--text); white-space: nowrap; }",
       "@media (min-width: 901px) { .pf-offerbar { display: none !important; } }",
-      /* Single owner for the bottom reservation: place() publishes the size as
-         --pf-barspace, this rule spends it. Nothing writes body padding inline. */
-      "@media (max-width: 900px) { body { padding-bottom: var(--pf-barspace, 0px); } }",
       /* Short viewports (iPhone SE class) — slim the bar so the fixed bottom
          stack leaves more of the 667px screen for scrollable content. */
       "@media (max-height: 700px) {",
@@ -74,10 +71,10 @@
     // Sit directly above the page's fixed action bar (if it has one) and keep
     // the page content clear of both.
     //
-    // The space the bars need is published as --pf-barspace and CONSUMED IN CSS
-    // (see the rule above). This function never writes padding directly: with a
-    // single owner, keyboard-aware.js can zero the reservation by overriding the
-    // variable, instead of two mechanisms fighting over an inline style.
+    // The space the bars need is published as --pf-barspace and CONSUMED IN
+    // brand.css (.pf-main / .pf-footer padding) so the dark footer fills the
+    // bottom — no light body gap under the footer. keyboard-aware.js can zero
+    // the reservation by overriding the variable.
     function place() {
       var ab = document.querySelector(".pf-actionbar");
       var root = document.documentElement;
